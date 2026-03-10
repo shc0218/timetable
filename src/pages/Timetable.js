@@ -14,6 +14,7 @@ const Timetable = () => {
   const todayIdx = new Date().getDay() - 1;
 
   useEffect(() => {
+    // 시간표 데이터 로드
     onValue(ref(db, 'timetable'), (snapshot) => {
       const data = snapshot.val();
       if (!data) return;
@@ -24,6 +25,7 @@ const Timetable = () => {
       setBaseSchedule(formatted);
     });
 
+    // 학생별 선택 데이터 로드
     onValue(ref(db, "studentData"), (snapshot) => {
       setStudentData(snapshot.val() || {});
     });
@@ -52,16 +54,18 @@ const Timetable = () => {
 
   const saveImage = async () => {
     if (!captureRef.current) return;
-    setIsCapturing(true);
+    setIsCapturing(true); // 캡처 시 오늘 날짜 강조 효과 잠시 제거
+    
     setTimeout(async () => {
       const canvas = await html2canvas(captureRef.current, {
-        scale: 4,
+        scale: 4, // 고해상도 저장
         backgroundColor: "#ffffff",
         useCORS: true,
+        logging: false,
       });
       const link = document.createElement('a');
       link.href = canvas.toDataURL('image/png');
-      link.download = `${selectedStudent || '시간표'}.png`;
+      link.download = `${selectedStudent || '3-6_시간표'}.png`;
       link.click();
       setIsCapturing(false);
     }, 100);
@@ -71,25 +75,31 @@ const Timetable = () => {
 
   return (
     <div className="timetable-container">
-      {/* 다시 디자인한 상단 컨트롤 영역 */}
       <div className="glass-control">
   <div className="select-container">
-    <span className="select-badge">STUDENT</span>
-    <select 
-      value={selectedStudent} 
-      onChange={(e) => setSelectedStudent(e.target.value)} 
-      className="modern-select"
-    >
-      <option value="">학생을 선택해 주세요</option>
-      {Object.keys(studentData).sort().map(name => (
-        <option key={name} value={name}>{name}</option>
-      ))}
-    </select>
+    {/* 시각적 포인트인 아이콘 배지 */}
+    <div className="select-icon-wrapper">
+      <span className="user-icon">👤</span>
+    </div>
+    
+    <div className="select-inner">
+      <span className="select-label">학생 선택</span>
+      <select 
+        value={selectedStudent} 
+        onChange={(e) => setSelectedStudent(e.target.value)} 
+        className="modern-select"
+      >
+        <option value="" disabled>목록에서 이름을 선택하세요</option>
+        {Object.keys(studentData).sort().map(name => (
+          <option key={name} value={name}>{name}</option>
+        ))}
+      </select>
+    </div>
   </div>
   
-  {/* 학생이 선택되었을 때만 저장 버튼 표시 */}
   {selectedStudent && (
     <button onClick={saveImage} className="save-action-btn">
+      <span className="btn-icon">📸</span>
       이미지 저장
     </button>
   )}
@@ -124,13 +134,7 @@ const Timetable = () => {
               <tbody>
                 {baseSchedule.map((row, rIdx) => (
                   <tr key={rIdx}>
-                    <td style={{ 
-                      textAlign: 'center', 
-                      fontSize: '15px', 
-                      fontWeight: '900', 
-                      color: '#cbd5e1', 
-                      borderRight: '1px solid #e2e8f0' 
-                    }}>{rIdx + 1}</td>
+                    <td className="period-cell">{rIdx + 1}</td>
                     {row.map((cell, cIdx) => {
                       const isCommon = !["L", "A", "B", "C", "D", "E", "F", "G", "H", "I", "SELF"].includes(cell?.toUpperCase());
                       const bgColor = cell === "SELF" ? "#fffbeb" : (isCommon && cell) ? "#f1f5f9" : "#ffffff";

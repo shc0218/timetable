@@ -37,7 +37,7 @@ const Settings = () => {
               });
             });
           } else {
-            alert("❌ 유효하지 않은 키입니다.");
+            alert("유효하지 않은 키입니다.");
             navigate("/");
           }
         }
@@ -74,13 +74,13 @@ const Settings = () => {
   return (
     <div className="settings-container">
       <header className="settings-header">
-        <div>
+        <div className="settings-title-group">
           <h1 className="settings-title">시간표 설정</h1>
-          <p className="settings-subtitle">드래그하여 순서를 조정하세요.</p>
+          <p className="settings-subtitle">모바일에서는 항목을 <b>길게 눌러서</b> 이동하세요.</p>
         </div>
         <div className="btn-group">
           <button onClick={() => navigate("/")} className="cancel-btn">취소</button>
-          <button onClick={handleSave} className="save-btn">변경사항 저장</button>
+          <button onClick={handleSave} className="save-btn">저장하기</button>
         </div>
       </header>
 
@@ -94,8 +94,7 @@ const Settings = () => {
                   <div 
                     {...provided.droppableProps} 
                     ref={provided.innerRef} 
-                    className="drop-zone"
-                    style={{ backgroundColor: snapshot.isDraggingOver ? '#f1f5f9' : 'transparent' }}
+                    className={`drop-zone ${snapshot.isDraggingOver ? 'active' : ''}`}
                   >
                     {scheduleData[day].map((item, index) => (
                       <Draggable key={`item-${day}-${index}`} draggableId={`${day}-${index}`} index={index}>
@@ -104,14 +103,11 @@ const Settings = () => {
                             ref={provided.innerRef}
                             {...provided.draggableProps}
                             {...provided.dragHandleProps}
-                            className="draggable-card"
+                            className={`draggable-card ${snapshot.isDragging ? 'is-dragging' : ''}`}
                             style={{
                               ...provided.draggableProps.style,
-                              boxShadow: snapshot.isDragging ? '0 15px 30px rgba(0,0,0,0.1)' : '0 1px 3px rgba(0,0,0,0.1)',
-                              borderColor: snapshot.isDragging ? '#2563eb' : '#e2e8f0',
-                              transform: snapshot.isDragging 
-                                ? `${provided.draggableProps.style?.transform} scale(1.03)` 
-                                : provided.draggableProps.style?.transform
+                              // 모바일 드래그 시작 시 브라우저 스크롤 방지
+                              touchAction: 'none' 
                             }}
                           >
                             <span className="card-badge">{index + 1}교시</span>

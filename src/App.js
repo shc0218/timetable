@@ -21,9 +21,10 @@ const NavItem = ({ to, children, icon }) => {
 
 function App() {
   return (
+    // GitHub Pages 경로인 /timetable/을 기본 경로로 설정
     <Router basename="/timetable">
       <div className="app-container">
-        {/* 사이드바 영역 */}
+        {/* 사이드바 영역: CSS 미디어 쿼리에 의해 모바일에서는 상단바로 변함 */}
         <aside className="sidebar">
           <div className="sidebar-logo">
             <span>3-6</span>
@@ -32,13 +33,12 @@ function App() {
           
           <nav>
             <ul>
-              <NavItem to="/" >시간표 보기</NavItem>
-              <NavItem to="/settings" >관리자 설정</NavItem>
+              <NavItem to="/">시간표 보기</NavItem>
+              <NavItem to="/settings">관리자 설정</NavItem>
             </ul>
           </nav>
 
-          {/* 하단 여백 채우기용 (선택사항) */}
-          <div style={{ marginTop: 'auto', padding: '10px', fontSize: '12px', color: '#cbd5e1' }}>
+          <div className="sidebar-footer">
             © 2026 Class 3-6
           </div>
         </aside>

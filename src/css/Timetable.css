@@ -1,4 +1,4 @@
-/* Timetable.css - 가로 30% 확장 / 세로 20% 축소 버전 */
+/* Timetable.css */
 
 .timetable-container {
   padding: 20px 20px 60px;
@@ -8,21 +8,27 @@
   background-color: #f8fafc;
 }
 
-/* 학생 선택 영역 (디자인 유지) */
+/* 기존 글래스 컨트롤 디자인 유지 */
 .glass-control {
   width: 100%;
-  max-width: 500px;
+  max-width: 520px;
   background: #ffffff;
-  padding: 6px 10px;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  padding: 8px 8px 8px 24px;
+  border-radius: 100px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.04);
   display: flex;
   align-items: center;
   margin-bottom: 40px;
   border: 1px solid #e2e8f0;
+  transition: all 0.3s ease;
 }
 
-/* 시간표 본체: 가로 30% 늘림 (820px -> 1060px) */
+.glass-control:focus-within {
+  border-color: #2563eb;
+  box-shadow: 0 10px 30px -10px rgba(37, 99, 235, 0.15);
+}
+
+/* 시간표 본체: 기존 확장/축소 비율 유지 */
 .capture-canvas {
   background-color: white;
   width: 100%;
@@ -30,6 +36,7 @@
   padding: 40px 50px;
   border-radius: 20px;
   box-shadow: 0 40px 80px -20px rgba(0, 0, 0, 0.08);
+  box-sizing: border-box;
 }
 
 .header-text {
@@ -41,7 +48,6 @@
   letter-spacing: -1.5px;
 }
 
-/* 테이블 구조 */
 .table-container-rounded {
   border-radius: 12px;
   overflow: hidden;
@@ -51,19 +57,18 @@
 .timetable-table {
   width: 100%;
   border-collapse: collapse;
-  table-layout: fixed; /* 가로 균등 배분 유지 */
+  table-layout: fixed;
 }
 
 .timetable-th {
   font-size: 20px;
   font-weight: 900;
-  padding: 18px 0; /* 헤더 세로 소폭 축소 */
+  padding: 18px 0;
   border-bottom: 4px solid #0f172a;
 }
 
-/* 셀 높이: 20% 줄임 (95px -> 76px) */
 .timetable-td {
-  height: 76px; 
+  height: 76px; /* 기존 20% 축소 높이 유지 */
   border: 1px solid #e2e8f0;
   padding: 0;
 }
@@ -92,57 +97,159 @@
   margin-top: 4px;
 }
 
+/* 📱 모바일 최적화 (768px 이하) */
+@media screen and (max-width: 768px) {
+  .timetable-container {
+    padding: 15px 10px;
+  }
+
+  .glass-control {
+    flex-direction: column;
+    padding: 12px;
+    border-radius: 20px;
+    gap: 10px;
+    max-width: 100%;
+  }
+
+  .select-container {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .modern-select {
+    font-size: 14px;
+    text-align: center;
+  }
+
+  .save-action-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .capture-canvas {
+    padding: 20px 10px;
+    border-radius: 12px;
+  }
+
+  .header-text {
+    font-size: 22px;
+    margin-bottom: 15px;
+  }
+
+  /* 테이블 내부 텍스트 유동적 축소 */
+  .timetable-th {
+    font-size: 14px;
+    padding: 10px 0;
+  }
+
+  .timetable-td {
+    height: 60px; /* 모바일용 높이 조정 */
+  }
+
+  .subject-text {
+    font-size: 13px;
+    word-break: keep-all;
+  }
+
+  .info-text {
+    font-size: 10px;
+  }
+
+  .timetable-table th:first-child,
+  .timetable-table td:first-child {
+    width: 30px !important; /* 교시 열 너비 축소 */
+    font-size: 12px;
+  }
+}
+
+.period-cell {
+  width: 60px; /* 너비를 살짝 넓혀서 안정감 부여 */
+  height: 76px; /* 기존 td 높이와 동일하게 유지 */
+  text-align: center;
+  background-color: #ffffff;
+  border-right: 1px solid #e2e8f0;
+  border-bottom: 1px solid #e2e8f0;
+
+  /* 중앙 정렬 핵심 */
+  display: table-cell; /* 테이블 구조 유지 */
+  vertical-align: middle; /* 세로 중앙 */
+  
+  /* 텍스트 스타일: 더 크고, 더 두껍게 */
+  font-size: 24px;      /* 기존보다 크게 조정 */
+  font-weight: 900;     /* 가장 두꺼운 두께 */
+  color: #cbd5e1;       /* 기존의 세련된 연회색 유지 (숫자가 너무 튀지 않게) */
+  letter-spacing: -1px;
+}
+
+/* 모바일에서의 숫자 크기 조정 */
+@media screen and (max-width: 768px) {
+  .period-cell {
+    width: 40px;
+    font-size: 18px;    /* 모바일 화면에 맞춰 적절히 축소 */
+    height: 60px;       /* 모바일 td 높이에 맞춤 */
+  }
+}
+
 .glass-control {
   width: 100%;
-  max-width: 520px;
-  background: #ffffff;
-  padding: 8px 8px 8px 24px; /* 왼쪽 여백으로 균형 조절 */
-  border-radius: 100px; /* 완만한 캡슐형 곡선 */
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.04);
+  max-width: 600px;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(10px); /* 배경 투명 블러 효과 */
+  padding: 10px 10px 10px 24px;
+  border-radius: 100px;
+  box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.05);
   display: flex;
   align-items: center;
   margin-bottom: 40px;
   border: 1px solid #e2e8f0;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* 포커스 시 푸른색 포인트 */
 .glass-control:focus-within {
   border-color: #2563eb;
-  box-shadow: 0 10px 30px -10px rgba(37, 99, 235, 0.15);
+  box-shadow: 0 10px 40px -10px rgba(37, 99, 235, 0.15);
+  transform: translateY(-2px);
 }
 
-.select-container {
-  flex: 1;
+/* 왼쪽 아이콘 영역 */
+.select-icon-wrapper {
+  width: 38px;
+  height: 38px;
+  background: #eff6ff;
+  border-radius: 50%;
   display: flex;
   align-items: center;
-  gap: 12px;
+  justify-content: center;
+  margin-right: 15px;
 }
 
-/* 왼쪽 파란색 라벨 배지 */
-.select-badge {
-  font-size: 11px;
-  color: #2563eb;
-  font-weight: 900;
-  letter-spacing: 1.5px;
-  text-transform: uppercase;
-  background: #eff6ff;
-  padding: 4px 10px;
-  border-radius: 50px;
-  white-space: nowrap;
+.user-icon { font-size: 18px; }
+
+/* 선택창 내부 구조 */
+.select-inner {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.select-label {
+  font-size: 10px;
+  font-weight: 800;
+  color: #94a3b8;
+  letter-spacing: 0.5px;
+  margin-bottom: -2px;
 }
 
 .modern-select {
-  flex: 1;
-  padding: 10px 0;
-  font-size: 16px;
   border: none;
   background: transparent;
-  color: #1e293b;
+  font-size: 16px;
   font-weight: 700;
+  color: #1e293b;
   cursor: pointer;
   outline: none;
-  appearance: none; /* 브라우저 기본 화살표 제거 */
+  padding: 4px 0;
+  appearance: none; /* 기본 화살표 숨김 */
 }
 
 /* 우측 저장 버튼 */
@@ -150,15 +257,46 @@
   background: #1e293b;
   color: #ffffff;
   border: none;
-  padding: 12px 28px;
+  padding: 14px 28px;
   border-radius: 100px;
   font-weight: 800;
   font-size: 14px;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
   transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .save-action-btn:hover {
   background: #2563eb;
-  transform: translateY(-1px);
+  transform: scale(1.02);
+}
+
+/* 📱 모바일 디자인 최적화 */
+@media screen and (max-width: 768px) {
+  .glass-control {
+    border-radius: 24px;
+    padding: 16px;
+    flex-direction: column;
+    gap: 16px;
+    max-width: 95%;
+  }
+
+  .select-container {
+    width: 100%;
+    margin-right: 0;
+    justify-content: center;
+  }
+
+  .select-inner {
+    align-items: center;
+  }
+
+  .save-action-btn {
+    width: 100%;
+    justify-content: center;
+    padding: 16px;
+  }
 }
