@@ -1,0 +1,164 @@
+/* Timetable.css - 가로 30% 확장 / 세로 20% 축소 버전 */
+
+.timetable-container {
+  padding: 20px 20px 60px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: #f8fafc;
+}
+
+/* 학생 선택 영역 (디자인 유지) */
+.glass-control {
+  width: 100%;
+  max-width: 500px;
+  background: #ffffff;
+  padding: 6px 10px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  display: flex;
+  align-items: center;
+  margin-bottom: 40px;
+  border: 1px solid #e2e8f0;
+}
+
+/* 시간표 본체: 가로 30% 늘림 (820px -> 1060px) */
+.capture-canvas {
+  background-color: white;
+  width: 100%;
+  max-width: 1060px; 
+  padding: 40px 50px;
+  border-radius: 20px;
+  box-shadow: 0 40px 80px -20px rgba(0, 0, 0, 0.08);
+}
+
+.header-text {
+  font-size: 34px;
+  font-weight: 900;
+  color: #0f172a;
+  margin-bottom: 30px;
+  text-align: center;
+  letter-spacing: -1.5px;
+}
+
+/* 테이블 구조 */
+.table-container-rounded {
+  border-radius: 12px;
+  overflow: hidden;
+  border: 4px solid #0f172a;
+}
+
+.timetable-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed; /* 가로 균등 배분 유지 */
+}
+
+.timetable-th {
+  font-size: 20px;
+  font-weight: 900;
+  padding: 18px 0; /* 헤더 세로 소폭 축소 */
+  border-bottom: 4px solid #0f172a;
+}
+
+/* 셀 높이: 20% 줄임 (95px -> 76px) */
+.timetable-td {
+  height: 76px; 
+  border: 1px solid #e2e8f0;
+  padding: 0;
+}
+
+.subject-wrapper {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.subject-text {
+  font-weight: 950;
+  font-size: 21px; 
+  color: #000;
+  line-height: 1.1;
+  text-align: center;
+}
+
+.info-text {
+  font-size: 13px;
+  font-weight: 800;
+  color: #475569;
+  margin-top: 4px;
+}
+
+.glass-control {
+  width: 100%;
+  max-width: 520px;
+  background: #ffffff;
+  padding: 8px 8px 8px 24px; /* 왼쪽 여백으로 균형 조절 */
+  border-radius: 100px; /* 완만한 캡슐형 곡선 */
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.04);
+  display: flex;
+  align-items: center;
+  margin-bottom: 40px;
+  border: 1px solid #e2e8f0;
+  transition: all 0.3s ease;
+}
+
+/* 포커스 시 푸른색 포인트 */
+.glass-control:focus-within {
+  border-color: #2563eb;
+  box-shadow: 0 10px 30px -10px rgba(37, 99, 235, 0.15);
+}
+
+.select-container {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* 왼쪽 파란색 라벨 배지 */
+.select-badge {
+  font-size: 11px;
+  color: #2563eb;
+  font-weight: 900;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  background: #eff6ff;
+  padding: 4px 10px;
+  border-radius: 50px;
+  white-space: nowrap;
+}
+
+.modern-select {
+  flex: 1;
+  padding: 10px 0;
+  font-size: 16px;
+  border: none;
+  background: transparent;
+  color: #1e293b;
+  font-weight: 700;
+  cursor: pointer;
+  outline: none;
+  appearance: none; /* 브라우저 기본 화살표 제거 */
+}
+
+/* 우측 저장 버튼 */
+.save-action-btn {
+  background: #1e293b;
+  color: #ffffff;
+  border: none;
+  padding: 12px 28px;
+  border-radius: 100px;
+  font-weight: 800;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.save-action-btn:hover {
+  background: #2563eb;
+  transform: translateY(-1px);
+}
