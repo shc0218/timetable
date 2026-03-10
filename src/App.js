@@ -21,7 +21,7 @@ const NavItem = ({ to, children, icon }) => {
 
 function App() {
   return (
-    <Router basename={process.env.PUBLIC_URL}>
+    <Router basename="/timetable">
       <div className="app-container">
         {/* 사이드바 영역 */}
         <aside className="sidebar">
