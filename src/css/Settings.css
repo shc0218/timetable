@@ -1,0 +1,158 @@
+/* Settings.css */
+.set-page {
+  max-width: 800px;
+  margin: 0 auto;
+  background: #f4f6f8;
+  min-height: 100vh;
+  padding-bottom: 40px;
+}
+
+/* 헤더 디자인 */
+.set-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 30px 20px;
+  background: #fff;
+}
+
+.set-info h1 { font-size: 1.5rem; margin: 0; font-weight: 800; color: #111; }
+.set-info p { margin: 5px 0 0; font-size: 0.85rem; color: #ff8a3d; font-weight: 600; }
+
+.set-actions { display: flex; gap: 10px; }
+.btn-exit { background: #eee; border: none; padding: 10px 18px; border-radius: 12px; font-weight: 700; cursor: pointer; }
+.btn-save { background: #111; color: #fff; border: none; padding: 10px 22px; border-radius: 12px; font-weight: 700; cursor: pointer; }
+
+/* 요일 탭 */
+.day-tabs {
+  display: flex;
+  padding: 0 20px;
+  background: #fff;
+  gap: 8px;
+  border-bottom: 1px solid #eee;
+}
+
+.day-tabs button {
+  flex: 1;
+  padding: 15px 0;
+  border: none;
+  background: none;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #bbb;
+  position: relative;
+  cursor: pointer;
+}
+
+.day-tabs button.active { color: #111; }
+.day-tabs button.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 20%;
+  right: 20%;
+  height: 3px;
+  background: #111;
+  border-radius: 3px;
+}
+
+/* 카드 리스트 */
+.board-container { padding: 20px; }
+.day-pane { display: none; }
+.day-pane.active { display: block; animation: slideUp 0.3s ease-out; }
+
+.subj-card {
+  background: #fff;
+  margin-bottom: 12px;
+  padding: 16px;
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+  border: 2px solid transparent;
+  transition: 0.2s;
+}
+
+.subj-card.dragging { box-shadow: 0 20px 40px rgba(0,0,0,0.1); border-color: #eee; }
+.subj-card.target { border-color: #ff8a3d; background: #fff9f5; }
+
+.drag-icon { color: #ddd; cursor: grab; font-size: 1.2rem; }
+.num { font-size: 0.8rem; font-weight: 800; color: #999; background: #f8f8f8; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; border-radius: 8px; }
+.name { flex: 1; font-weight: 700; color: #333; font-size: 1.05rem; }
+
+.swap-trigger {
+  padding: 8px 14px;
+  border-radius: 10px;
+  border: 1px solid #eee;
+  background: #fff;
+  font-weight: 700;
+  font-size: 0.8rem;
+  color: #666;
+  cursor: pointer;
+}
+
+.swap-trigger:hover { background: #f8f8f8; }
+
+/* 인증 화면 */
+.auth-container {
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f4f6f8;
+}
+
+.auth-box {
+  background: #fff;
+  padding: 40px;
+  border-radius: 30px;
+  width: 90%;
+  max-width: 360px;
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+}
+
+.auth-header span { font-size: 3rem; display: block; margin-bottom: 15px; }
+.auth-header h2 { margin: 0 0 20px; font-weight: 800; }
+
+.auth-box input {
+  width: 100%;
+  padding: 15px;
+  border-radius: 15px;
+  border: 1px solid #eee;
+  background: #f9f9f9;
+  margin-bottom: 15px;
+  text-align: center;
+  font-size: 1rem;
+}
+
+.auth-box button {
+  width: 100%;
+  padding: 15px;
+  border-radius: 15px;
+  border: none;
+  background: #111;
+  color: #fff;
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* PC 버전: 5컬럼 그리드 유지 */
+@media (min-width: 769px) {
+  .day-tabs { display: none; }
+  .day-pane { display: block !important; }
+  .board-container {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 15px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  .set-page { max-width: 100%; }
+}

@@ -1,6 +1,7 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
 import { getDatabase } from "firebase/database";
+import { getAuth } from "firebase/auth";
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -13,8 +14,10 @@ const firebaseConfig = {
   storageBucket: "timetab-78dae.firebasestorage.app",
   messagingSenderId: "216613351965",
   appId: "1:216613351965:web:1380eb3b0047c3bedf4cf4"
+  
 };
 
 // Initialize Firebase
-const app = initializeApp(firebaseConfig);
+export const app = initializeApp(firebaseConfig);;
 export const db = getDatabase(app);
+export const auth = getAuth(app);

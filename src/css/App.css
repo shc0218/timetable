@@ -1,116 +1,129 @@
 /* App.css */
+:root {
+  --primary-color: #ff8a3d;
+  --bg-color: #f8f9fa;
+  --nav-bg: #ffffff;
+  --text-main: #222;
+  --text-sub: #999;
+}
+
 * {
-  margin: 0;
-  padding: 0;
   box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent; /* 모바일 터치 시 하이라이트 제거 */
+}
+
+body {
+  margin: 0;
+  background-color: var(--bg-color);
+  font-family: 'Pretendard', sans-serif;
+  color: var(--text-main);
 }
 
 .app-container {
   display: flex;
-  min-height: 100vh;
-  background-color: #f8fafc;
+  height: 100vh;
 }
 
-/* 사이드바 기본 디자인 유지 */
-.sidebar {
-  width: 260px;
-  background-color: #ffffff;
-  border-right: 1px solid #e2e8f0;
+/* --- 데스크탑 사이드바 --- */
+.navigation {
+  width: 80px;
+  background-color: var(--nav-bg);
+  border-right: 1px solid #eee;
   display: flex;
   flex-direction: column;
-  padding: 30px 20px;
-  position: sticky;
-  top: 0;
-  height: 100vh;
-  z-index: 100;
-}
-
-.sidebar-logo {
-  font-size: 24px;
-  font-weight: 900;
-  color: #1e293b;
-  margin-bottom: 40px;
-  padding-left: 10px;
-  display: flex;
   align-items: center;
-  gap: 10px;
+  padding: 30px 0;
+  z-index: 1000;
 }
 
-.sidebar nav ul {
+.nav-logo {
+  font-weight: 900;
+  color: var(--primary-color);
+  font-size: 1.2rem;
+  margin-bottom: 50px;
+}
+
+.nav-menu { width: 100%; }
+.nav-menu ul {
   list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  align-items: center;
 }
 
-.nav-item {
-  margin-bottom: 8px;
-}
+.nav-item { width: 100%; display: flex; justify-content: center; }
 
 .nav-link {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 12px;
-  padding: 14px 16px;
   text-decoration: none;
-  color: #64748b;
-  font-weight: 600;
-  font-size: 15px;
-  border-radius: 12px;
-  transition: all 0.2s ease;
+  color: var(--text-sub);
+  width: 56px;
+  padding: 10px 0;
+  border-radius: 16px;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.nav-link:hover {
-  background-color: #f1f5f9;
-  color: #1e293b;
-}
+.nav-icon { font-size: 22px; margin-bottom: 4px; }
+.nav-label { font-size: 11px; font-weight: 700; }
 
 .nav-link.active {
-  background-color: #eff6ff;
-  color: #2563eb;
+  background-color: #fff0e6;
+  color: var(--primary-color);
 }
 
+/* --- 메인 컨텐츠 --- */
 .content {
   flex: 1;
   overflow-y: auto;
-  width: 100%;
+  padding: 20px;
 }
 
-/* 📱 모바일 대응: 사이드바를 상단으로 전환 */
-@media screen and (max-width: 1024px) {
-  .app-container {
-    flex-direction: column;
-  }
+/* --- 📱 모바일 환경 (768px 이하) --- */
+@media (max-width: 768px) {
+  .app-container { flex-direction: column; }
 
-  .sidebar {
+  .navigation {
     width: 100%;
-    height: auto;
-    padding: 15px 20px;
+    height: 75px;
+    position: fixed;
+    bottom: 0;
+    left: 0;
     flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
+    padding: 0 10px;
     border-right: none;
-    border-bottom: 1px solid #e2e8f0;
-    position: relative;
+    border-top: 1px solid rgba(0,0,0,0.05);
+    /* 모바일 앱 느낌을 주는 블러 효과와 그림자 */
+    backdrop-filter: blur(10px);
+    background-color: rgba(255, 255, 255, 0.85);
+    box-shadow: 0 -5px 20px rgba(0,0,0,0.03);
+    padding-bottom: env(safe-area-inset-bottom); /* 아이폰 하단 홈바 대응 */
   }
 
-  .sidebar-logo {
-    margin-bottom: 0;
-    font-size: 20px;
-  }
+  .nav-logo { display: none; }
 
-  .sidebar nav ul {
-    display: flex;
-    gap: 8px;
-  }
-
-  .nav-item {
-    margin-bottom: 0;
+  .nav-menu ul {
+    flex-direction: row;
+    justify-content: space-around;
+    gap: 0;
   }
 
   .nav-link {
-    padding: 10px 12px;
-    font-size: 13px;
+    width: 25%;
+    background: transparent;
   }
 
-  .sidebar div[style*="margin-top: auto"] {
-    display: none; /* 모바일 하단 카피라이트 숨김 */
+  .nav-link.active {
+    background: transparent; /* 모바일은 배경색 대신 텍스트 색상만 강조 */
+    transform: translateY(-2px);
+  }
+
+  .content {
+    padding: 15px;
+    padding-bottom: 100px; /* 하단바에 가려지지 않게 여백 추가 */
   }
 }

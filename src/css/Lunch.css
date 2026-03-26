@@ -1,0 +1,233 @@
+/* 1. 배경 컨테이너 */
+.lunch-container {
+  padding: 40px 0; /* 상하단 여백 */
+  background: linear-gradient(180deg, #f8f9fa 0%, #edf1f4 100%);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+  overflow: hidden; /* 가로 스크롤 방지 */
+}
+
+/* 2. Swiper 컨테이너 설정 (Today 배지 공간 확보) */
+.lunch-swiper {
+  width: 100%;
+  padding-top: 30px !important; /* 배지가 튀어나올 공간 확보 */
+  padding-bottom: 50px !important; /* 페이지네이션 공간 */
+  overflow: visible !important; /* 배지가 잘리지 않도록 설정 */
+}
+
+/* 3. Swiper 슬라이드 및 카드 애니메이션 */
+.lunch-slide {
+  width: 88%; /* 모바일에서 꽉 차 보이지만 옆이 살짝 보이는 최적의 너비 */
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  opacity: 0.5;
+  transform: scale(0.9);
+}
+
+/* 활성화된 중앙 카드 */
+.swiper-slide-active {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* 4. 급식 카드 메인 박스 */
+.lunch-card {
+  position: relative;
+  background-color: #ffffff;
+  border-radius: 30px;
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.06);
+  padding: 35px 25px;
+  height: calc(100vh - 220px); /* 화면 높이에 반응 */
+  max-height: 580px;
+  min-height: 460px;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  /* 중요: 배지가 밖으로 보일 수 있게 설정 */
+  overflow: visible; 
+}
+
+/* 오늘 날짜 카드 은은한 강조 */
+.is-today {
+  background-color: #fffaf7;
+  border: 1.5px solid rgba(255, 138, 97, 0.2);
+}
+
+/* 5. Today 배지 (절대 안 잘리게 배치) */
+.today-badge {
+  position: absolute;
+  top: -15px; /* 카드 밖으로 살짝 튀어나옴 */
+  left: 25px;
+  background: linear-gradient(135deg, #ff8a61 0%, #ff6b3d 100%);
+  color: white;
+  padding: 6px 18px;
+  border-radius: 14px;
+  font-weight: 800;
+  font-size: 0.75rem;
+  box-shadow: 0 6px 15px rgba(255, 138, 61, 0.3);
+  z-index: 10;
+  letter-spacing: 0.5px;
+}
+
+/* 6. 헤더 (날짜 및 요일) */
+.lunch-header-group {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 25px;
+}
+
+.calendar-badge {
+  background: linear-gradient(135deg, #ff8a61 0%, #ff6b3d 100%);
+  width: 58px;
+  height: 64px;
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 6px 12px rgba(255, 138, 61, 0.15);
+  flex-shrink: 0;
+}
+
+.cal-month {
+  background-color: rgba(255, 255, 255, 0.15);
+  color: white;
+  font-size: 0.7rem;
+  padding: 4px 0;
+  text-align: center;
+  font-weight: 600;
+}
+
+.cal-date {
+  color: white;
+  font-size: 1.8rem;
+  font-weight: 800;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex: 1;
+}
+
+.title-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.day-label {
+  color: #ff7e50;
+  font-weight: 700;
+  font-size: 0.9rem;
+  margin-bottom: 2px;
+}
+
+.lunch-title {
+  font-size: 1.55rem;
+  color: #1d1d1f;
+  font-weight: 850;
+  margin: 0;
+  letter-spacing: -0.8px;
+}
+
+/* 7. 구분선 */
+.lunch-divider {
+  height: 2px;
+  background-color: #f1f3f5;
+  border-radius: 10px;
+  margin-bottom: 25px;
+}
+
+/* 8. 메뉴 리스트 (모바일 부드러운 스크롤) */
+.menu-content {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-right: 4px;
+}
+
+.menu-content::-webkit-scrollbar {
+  width: 4px;
+}
+.menu-content::-webkit-scrollbar-thumb {
+  background: #e9ecef;
+  border-radius: 10px;
+}
+
+.lunch-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.lunch-item {
+  display: flex;
+  align-items: center;
+  padding: 16px 20px;
+  margin-bottom: 12px;
+  background-color: #f8f9fa;
+  border-radius: 18px;
+  border: 1px solid #f1f3f5;
+  transition: all 0.2s ease;
+}
+
+.item-dot {
+  width: 6px;
+  height: 6px;
+  background-color: #ff8a61;
+  border-radius: 50%;
+  margin-right: 14px;
+  flex-shrink: 0;
+}
+
+.item-text {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #3a3a3c;
+  line-height: 1.4;
+}
+
+/* 터치했을 때 피드백 */
+.lunch-item:active {
+  background-color: #fff0e6;
+  transform: scale(0.98);
+}
+
+/* 9. 데이터 없음 */
+.no-lunch {
+  text-align: center;
+  color: #adb5bd;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  flex: 1;
+}
+
+/* 10. Swiper 페이지네이션 점 스타일 */
+.swiper-pagination-bullet {
+  background: #d1d1d6 !important;
+  opacity: 1 !important;
+}
+
+.swiper-pagination-bullet-active {
+  background: #ff8a61 !important;
+  width: 22px !important; /* 활성화된 점은 길게 */
+  border-radius: 6px !important;
+}
+
+/* 11. 태블릿 이상 대응 */
+@media (min-width: 768px) {
+  .lunch-slide { width: 400px; }
+  .lunch-card { height: 600px; padding: 45px 35px; }
+}
+
+/* 로딩 화면 */
+.loading-screen {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #ff8a61;
+}
