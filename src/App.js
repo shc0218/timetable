@@ -1,5 +1,13 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+
+import React, {
+    useEffect,
+    useMemo,
+    useRef,
+    useState
+} from "react";
+
 import html2canvas from "html2canvas";
+import { Client } from "@stomp/stompjs";
 
 import {
     getStudents,
@@ -15,7 +23,13 @@ import "./App.css";
 // 기본 설정
 // ======================================================
 
-const DAYS = ["월", "화", "수", "목", "금"];
+const DAYS = [
+    "월",
+    "화",
+    "수",
+    "목",
+    "금"
+];
 
 const SUBJECT_CODES = [
     "A",
@@ -34,6 +48,31 @@ const PERIOD_COUNT = 7;
 
 
 // ======================================================
+// WebSocket 주소
+// ======================================================
+
+function getWebSocketUrl() {
+
+    // 직접 지정한 WebSocket 주소가 있으면 사용
+    if (process.env.REACT_APP_WS_URL) {
+        return process.env.REACT_APP_WS_URL;
+    }
+
+    // API 주소를 이용해서 자동 생성
+    if (process.env.REACT_APP_API_URL) {
+
+        return process.env.REACT_APP_API_URL
+            .replace(/^https:\/\//, "wss://")
+            .replace(/^http:\/\//, "ws://")
+            .replace(/\/api\/?$/, "")
+            + "/ws";
+    }
+
+    return null;
+}
+
+
+// ======================================================
 // App
 // ======================================================
 
@@ -43,50 +82,80 @@ function App() {
     // 페이지
     // ==================================================
 
-    const [page, setPage] = useState("timetable");
+    const [page, setPage] =
+        useState("timetable");
 
 
     // ==================================================
     // 학생
     // ==================================================
 
-    const [students, setStudents] = useState([]);
-    const [selectedStudentId, setSelectedStudentId] = useState("");
+    const [students, setStudents] =
+        useState([]);
+
+    const [selectedStudentId, setSelectedStudentId] =
+        useState("");
 
 
     // ==================================================
     // 학생 데이터
     // ==================================================
 
-    const [subjects, setSubjects] = useState({});
-    const [timetable, setTimetable] = useState({});
+    const [subjects, setSubjects] =
+        useState({});
+
+    const [timetable, setTimetable] =
+        useState({});
 
 
     // ==================================================
     // 좌석
     // ==================================================
 
-    const [seats, setSeats] = useState([]);
+    const [seats, setSeats] =
+        useState([]);
 
 
     // ==================================================
     // 상태
     // ==================================================
 
-    const [loading, setLoading] = useState(true);
-    const [studentLoading, setStudentLoading] = useState(false);
-    const [seatLoading, setSeatLoading] = useState(false);
-    const [saving, setSaving] = useState(false);
+    const [loading, setLoading] =
+        useState(true);
 
-    const [error, setError] = useState("");
-    const [message, setMessage] = useState("");
+    const [studentLoading, setStudentLoading] =
+        useState(false);
+
+    const [seatLoading, setSeatLoading] =
+        useState(false);
+
+    const [saving, setSaving] =
+        useState(false);
+
+    const [error, setError] =
+        useState("");
+
+    const [message, setMessage] =
+        useState("");
+
+    const [socketConnected, setSocketConnected] =
+        useState(false);
 
 
     // ==================================================
     // 캡처 영역
     // ==================================================
 
-    const captureRef = useRef(null);
+    const captureRef =
+        useRef(null);
+
+
+    // ==================================================
+    // WebSocket
+    // ==================================================
+
+    const stompClientRef =
+        useRef(null);
 
 
     // ==================================================
@@ -296,23 +365,309 @@ function App() {
 
 
     // ==================================================
-    // 페이지 변경
+    // 좌석 WebSocket 연결
     // ==================================================
 
-    const changePage = (newPage) => {
+    const connectSeatWebSocket = () => {
 
-        setPage(newPage);
+        // 이미 연결되어 있으면 중복 연결하지 않음
+        if (
+            stompClientRef.current &&
+            stompClientRef.current.active
+        ) {
 
-        setError("");
-        setMessage("");
+            console.log(
+                "WebSocket이 이미 연결되어 있습니다."
+            );
 
-        if (newPage === "seats") {
-
-            loadSeats();
+            return;
 
         }
 
+
+        const wsUrl =
+            getWebSocketUrl();
+
+
+        if (!wsUrl) {
+
+            console.error(
+                "WebSocket URL이 설정되지 않았습니다."
+            );
+
+            setSocketConnected(false);
+
+            return;
+
+        }
+
+
+        console.log(
+            "좌석 WebSocket 연결:",
+            wsUrl
+        );
+
+
+        const client =
+            new Client({
+
+                brokerURL: wsUrl,
+
+                reconnectDelay: 5000,
+
+                heartbeatIncoming: 10000,
+
+                heartbeatOutgoing: 10000,
+
+
+                // --------------------------------------
+                // STOMP 디버그
+                // --------------------------------------
+
+                debug: (message) => {
+
+                    console.log(
+                        "[STOMP]",
+                        message
+                    );
+
+                },
+
+
+                // --------------------------------------
+                // 연결 성공
+                // --------------------------------------
+
+                onConnect: () => {
+
+                    console.log(
+                        "좌석 WebSocket 연결 성공"
+                    );
+
+                    setSocketConnected(true);
+
+
+                    // ----------------------------------
+                    // 좌석 변경 구독
+                    // ----------------------------------
+
+                    client.subscribe(
+                        "/topic/seats",
+                        (message) => {
+
+                            try {
+
+                                const data =
+                                    JSON.parse(
+                                        message.body
+                                    );
+
+
+                                console.log(
+                                    "실시간 좌석 변경:",
+                                    data
+                                );
+
+
+                                if (
+                                    Array.isArray(data)
+                                ) {
+
+                                    setSeats(data);
+
+                                }
+
+                            } catch (err) {
+
+                                console.error(
+                                    "좌석 WebSocket 데이터 처리 실패:",
+                                    err
+                                );
+
+                            }
+
+                        }
+                    );
+
+                },
+
+
+                // --------------------------------------
+                // 연결 종료
+                // --------------------------------------
+
+                onDisconnect: () => {
+
+                    console.log(
+                        "좌석 WebSocket 연결 종료"
+                    );
+
+                    setSocketConnected(false);
+
+                },
+
+
+                // --------------------------------------
+                // STOMP 오류
+                // --------------------------------------
+
+                onStompError: (frame) => {
+
+                    console.error(
+                        "STOMP 오류:",
+                        frame
+                    );
+
+                    setSocketConnected(false);
+
+                },
+
+
+                // --------------------------------------
+                // WebSocket 오류
+                // --------------------------------------
+
+                onWebSocketError: (event) => {
+
+                    console.error(
+                        "WebSocket 오류:",
+                        event
+                    );
+
+                    setSocketConnected(false);
+
+                }
+
+            });
+
+
+        stompClientRef.current =
+            client;
+
+
+        client.activate();
+
     };
+
+
+    // ==================================================
+    // WebSocket 종료
+    // ==================================================
+
+    const disconnectSeatWebSocket =
+        async () => {
+
+            const client =
+                stompClientRef.current;
+
+
+            if (!client) {
+
+                setSocketConnected(false);
+
+                return;
+
+            }
+
+
+            try {
+
+                console.log(
+                    "좌석 WebSocket 종료"
+                );
+
+                await client.deactivate();
+
+            } catch (err) {
+
+                console.error(
+                    "WebSocket 종료 오류:",
+                    err
+                );
+
+            } finally {
+
+                stompClientRef.current =
+                    null;
+
+                setSocketConnected(false);
+
+            }
+
+        };
+
+
+    // ==================================================
+    // 페이지 변경
+    // ==================================================
+
+    const changePage =
+        async (newPage) => {
+
+            setPage(newPage);
+
+            setError("");
+            setMessage("");
+
+
+            // ------------------------------------------
+            // 좌석 페이지
+            // ------------------------------------------
+
+            if (
+                newPage === "seats"
+            ) {
+
+                await loadSeats();
+
+                connectSeatWebSocket();
+
+            }
+
+
+            // ------------------------------------------
+            // 시간표 페이지
+            // ------------------------------------------
+
+            else {
+
+                await disconnectSeatWebSocket();
+
+            }
+
+        };
+
+
+    // ==================================================
+    // 컴포넌트 종료 시 WebSocket 정리
+    // ==================================================
+
+    useEffect(() => {
+
+        return () => {
+
+            const client =
+                stompClientRef.current;
+
+
+            if (client) {
+
+                client
+                    .deactivate()
+                    .catch(err => {
+
+                        console.error(
+                            "WebSocket 종료 실패:",
+                            err
+                        );
+
+                    });
+
+            }
+
+        };
+
+    }, []);
 
 
     // ==================================================
@@ -328,8 +683,10 @@ function App() {
             return null;
         }
 
+
         const dayData =
             timetable[day];
+
 
         if (!dayData) {
             return null;
@@ -340,7 +697,9 @@ function App() {
         // 배열 형태
         // ------------------------------------------
 
-        if (Array.isArray(dayData)) {
+        if (
+            Array.isArray(dayData)
+        ) {
 
             return (
                 dayData[periodIndex] ||
@@ -369,452 +728,479 @@ function App() {
     // 과목 이름 가져오기
     // ==================================================
 
-    const getSubjectName = (cell) => {
+    const getSubjectName =
+        (cell) => {
 
-        if (!cell) {
-            return "";
-        }
-
-
-        // ------------------------------------------
-        // 배열 형태
-        //
-        // ["수학", "1"]
-        // ------------------------------------------
-
-        if (Array.isArray(cell)) {
-
-            return cell[0] || "";
-
-        }
+            if (!cell) {
+                return "";
+            }
 
 
-        // ------------------------------------------
-        // 문자열
-        // ------------------------------------------
-
-        if (typeof cell === "string") {
+            // ------------------------------------------
+            // 배열
+            // ------------------------------------------
 
             if (
-                subjects[cell] &&
-                Array.isArray(subjects[cell])
+                Array.isArray(cell)
             ) {
 
-                return subjects[cell][0];
+                return cell[0] || "";
 
             }
 
-            return cell;
 
-        }
+            // ------------------------------------------
+            // 문자열
+            // ------------------------------------------
 
-
-        // ------------------------------------------
-        // 객체
-        // ------------------------------------------
-
-        if (typeof cell === "object") {
-
-            if (cell.name) {
-                return cell.name;
-            }
-
-            if (cell.subject) {
-                return cell.subject;
-            }
-
-            if (cell.code) {
-
-                const subject =
-                    subjects[cell.code];
+            if (
+                typeof cell === "string"
+            ) {
 
                 if (
-                    Array.isArray(subject)
+                    subjects[cell] &&
+                    Array.isArray(subjects[cell])
                 ) {
 
-                    return subject[0];
+                    return subjects[cell][0];
 
                 }
 
-                if (
-                    typeof subject ===
-                    "string"
-                ) {
-
-                    return subject;
-
-                }
-
-                return cell.code;
+                return cell;
 
             }
 
-        }
 
-        return "";
+            // ------------------------------------------
+            // 객체
+            // ------------------------------------------
 
-    };
+            if (
+                typeof cell === "object"
+            ) {
+
+                if (cell.name) {
+                    return cell.name;
+                }
+
+
+                if (cell.subject) {
+                    return cell.subject;
+                }
+
+
+                if (cell.code) {
+
+                    const subject =
+                        subjects[cell.code];
+
+
+                    if (
+                        Array.isArray(subject)
+                    ) {
+
+                        return subject[0];
+
+                    }
+
+
+                    if (
+                        typeof subject ===
+                        "string"
+                    ) {
+
+                        return subject;
+
+                    }
+
+
+                    return cell.code;
+
+                }
+
+            }
+
+
+            return "";
+
+        };
 
 
     // ==================================================
     // 반 정보 가져오기
     // ==================================================
 
-    const getClassName = (cell) => {
+    const getClassName =
+        (cell) => {
 
-        if (!cell) {
+            if (!cell) {
+                return "";
+            }
+
+
+            if (
+                Array.isArray(cell)
+            ) {
+
+                return cell[1] || "";
+
+            }
+
+
+            if (
+                typeof cell === "object"
+            ) {
+
+                return (
+                    cell.className ||
+                    cell.class ||
+                    cell.room ||
+                    ""
+                );
+
+            }
+
+
             return "";
-        }
 
-
-        if (Array.isArray(cell)) {
-
-            return cell[1] || "";
-
-        }
-
-
-        if (
-            typeof cell === "object"
-        ) {
-
-            return (
-                cell.className ||
-                cell.class ||
-                cell.room ||
-                ""
-            );
-
-        }
-
-
-        return "";
-
-    };
+        };
 
 
     // ==================================================
     // 시간표 이미지 저장
     // ==================================================
 
-    const saveTimetableImage = async () => {
+    const saveTimetableImage =
+        async () => {
 
-        if (!selectedStudentId) {
+            if (!selectedStudentId) {
 
-            setError(
-                "학생을 먼저 선택해주세요."
-            );
+                setError(
+                    "학생을 먼저 선택해주세요."
+                );
 
-            return;
+                return;
 
-        }
-
-
-        if (!captureRef.current) {
-
-            setError(
-                "시간표 캡처 영역을 찾을 수 없습니다."
-            );
-
-            return;
-
-        }
+            }
 
 
-        try {
+            if (!captureRef.current) {
 
-            setSaving(true);
-            setError("");
-            setMessage("");
+                setError(
+                    "시간표 캡처 영역을 찾을 수 없습니다."
+                );
 
+                return;
 
-            // ------------------------------------------
-            // 캡처 영역
-            // ------------------------------------------
-
-            const element =
-                captureRef.current;
+            }
 
 
-            // ------------------------------------------
-            // 캡처
-            // ------------------------------------------
+            try {
 
-            const canvas =
-                await html2canvas(
-                    element,
-                    {
-                        scale: 2,
+                setSaving(true);
 
-                        backgroundColor:
-                            "#ffffff",
+                setError("");
+                setMessage("");
 
-                        useCORS: true,
 
-                        logging: false,
+                // --------------------------------------
+                // 캡처 영역
+                // --------------------------------------
 
-                        scrollX: 0,
+                const element =
+                    captureRef.current;
 
-                        scrollY: 0
-                    }
+
+                // --------------------------------------
+                // 캡처
+                // --------------------------------------
+
+                const canvas =
+                    await html2canvas(
+                        element,
+                        {
+                            scale: 2,
+
+                            backgroundColor:
+                                "#ffffff",
+
+                            useCORS: true,
+
+                            logging: false,
+
+                            scrollX: 0,
+
+                            scrollY: 0
+                        }
+                    );
+
+
+                // --------------------------------------
+                // 이미지
+                // --------------------------------------
+
+                const image =
+                    canvas.toDataURL(
+                        "image/png"
+                    );
+
+
+                // --------------------------------------
+                // 파일명
+                // --------------------------------------
+
+                const studentName =
+                    selectedStudent?.name ||
+                    "학생";
+
+
+                const safeName =
+                    studentName.replace(
+                        /[\\/:*?"<>|]/g,
+                        "_"
+                    );
+
+
+                const filename =
+                    `${safeName}_시간표.png`;
+
+
+                // --------------------------------------
+                // 다운로드
+                // --------------------------------------
+
+                const link =
+                    document.createElement("a");
+
+
+                link.href =
+                    image;
+
+
+                link.download =
+                    filename;
+
+
+                document.body.appendChild(
+                    link
                 );
 
 
-            // ------------------------------------------
-            // 이미지 생성
-            // ------------------------------------------
+                link.click();
 
-            const image =
-                canvas.toDataURL(
-                    "image/png"
+
+                document.body.removeChild(
+                    link
                 );
 
 
-            // ------------------------------------------
-            // 파일명
-            // ------------------------------------------
-
-            const studentName =
-                selectedStudent?.name ||
-                "학생";
-
-
-            const safeName =
-                studentName.replace(
-                    /[\\/:*?"<>|]/g,
-                    "_"
+                setMessage(
+                    "시간표 이미지가 저장되었습니다."
                 );
 
+            } catch (err) {
 
-            const filename =
-                `${safeName}_시간표.png`;
+                console.error(
+                    "시간표 캡처 실패:",
+                    err
+                );
 
+                setError(
+                    "시간표 이미지를 저장하지 못했습니다."
+                );
 
-            // ------------------------------------------
-            // 다운로드
-            // ------------------------------------------
+            } finally {
 
-            const link =
-                document.createElement("a");
+                setSaving(false);
 
-            link.href = image;
+            }
 
-            link.download =
-                filename;
-
-            document.body.appendChild(
-                link
-            );
-
-            link.click();
-
-            document.body.removeChild(
-                link
-            );
-
-
-            setMessage(
-                "시간표 이미지가 저장되었습니다."
-            );
-
-        } catch (err) {
-
-            console.error(
-                "시간표 캡처 실패:",
-                err
-            );
-
-            setError(
-                "시간표 이미지를 저장하지 못했습니다."
-            );
-
-        } finally {
-
-            setSaving(false);
-
-        }
-
-    };
+        };
 
 
     // ==================================================
     // 전체 시간표 캡처 영역
     // ==================================================
 
-    const renderCaptureTimetable = () => {
+    const renderCaptureTimetable =
+        () => {
 
-        return (
+            return (
 
-            <div
-                ref={captureRef}
-                className="timetable-capture"
-            >
+                <div
+                    ref={captureRef}
+                    className="timetable-capture"
+                >
 
-                <div className="capture-title">
+                    <div className="capture-title">
 
-                    <h1>
-                        학생 시간표
-                    </h1>
+                        <h1>
+                            학생 시간표
+                        </h1>
 
-                    <h2>
-                        {
-                            selectedStudent?.name ||
-                            "학생"
-                        }
-                    </h2>
+                        <h2>
+                            {
+                                selectedStudent?.name ||
+                                "학생"
+                            }
+                        </h2>
 
-                </div>
+                    </div>
 
 
-                <table>
+                    <table>
 
-                    <thead>
+                        <thead>
 
-                        <tr>
+                            <tr>
 
-                            <th>
-                                교시
-                            </th>
+                                <th>
+                                    교시
+                                </th>
 
-                            {DAYS.map(
-                                day => (
 
-                                    <th key={day}>
-                                        {day}
-                                    </th>
+                                {DAYS.map(
+                                    day => (
+
+                                        <th key={day}>
+                                            {day}
+                                        </th>
+
+                                    )
+                                )}
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody>
+
+                            {Array.from(
+                                {
+                                    length:
+                                        PERIOD_COUNT
+                                },
+                                (
+                                    _,
+                                    periodIndex
+                                ) => (
+
+                                    <tr
+                                        key={
+                                            periodIndex
+                                        }
+                                    >
+
+                                        <th>
+
+                                            {
+                                                periodIndex +
+                                                1
+                                            }
+
+                                            교시
+
+                                        </th>
+
+
+                                        {DAYS.map(
+                                            day => {
+
+                                                const cell =
+                                                    getTimetableCell(
+                                                        day,
+                                                        periodIndex
+                                                    );
+
+
+                                                const subjectName =
+                                                    getSubjectName(
+                                                        cell
+                                                    );
+
+
+                                                const className =
+                                                    getClassName(
+                                                        cell
+                                                    );
+
+
+                                                return (
+
+                                                    <td
+                                                        key={
+                                                            day
+                                                        }
+                                                    >
+
+                                                        {subjectName ? (
+
+                                                            <>
+
+                                                                <div className="capture-subject">
+
+                                                                    {
+                                                                        subjectName
+                                                                    }
+
+                                                                </div>
+
+
+                                                                {className && (
+
+                                                                    <div className="capture-class">
+
+                                                                        {
+                                                                            className
+                                                                        }
+
+                                                                        반
+
+                                                                    </div>
+
+                                                                )}
+
+                                                            </>
+
+                                                        ) : (
+
+                                                            <span className="empty-cell">
+
+                                                                -
+
+                                                            </span>
+
+                                                        )}
+
+                                                    </td>
+
+                                                );
+
+                                            }
+                                        )}
+
+                                    </tr>
 
                                 )
                             )}
 
-                        </tr>
+                        </tbody>
 
-                    </thead>
-
-
-                    <tbody>
-
-                        {Array.from(
-                            {
-                                length:
-                                    PERIOD_COUNT
-                            },
-                            (_, periodIndex) => (
-
-                                <tr
-                                    key={
-                                        periodIndex
-                                    }
-                                >
-
-                                    <th>
-
-                                        {
-                                            periodIndex +
-                                            1
-                                        }
-
-                                        교시
-
-                                    </th>
+                    </table>
 
 
-                                    {DAYS.map(
-                                        day => {
+                    <div className="capture-footer">
 
-                                            const cell =
-                                                getTimetableCell(
-                                                    day,
-                                                    periodIndex
-                                                );
+                        Class Database
 
-
-                                            const subjectName =
-                                                getSubjectName(
-                                                    cell
-                                                );
-
-
-                                            const className =
-                                                getClassName(
-                                                    cell
-                                                );
-
-
-                                            return (
-
-                                                <td
-                                                    key={
-                                                        day
-                                                    }
-                                                >
-
-                                                    {subjectName ? (
-
-                                                        <>
-
-                                                            <div className="capture-subject">
-
-                                                                {
-                                                                    subjectName
-                                                                }
-
-                                                            </div>
-
-
-                                                            {className && (
-
-                                                                <div className="capture-class">
-
-                                                                    {
-                                                                        className
-                                                                    }
-
-                                                                    반
-
-                                                                </div>
-
-                                                            )}
-
-                                                        </>
-
-                                                    ) : (
-
-                                                        <span className="empty-cell">
-
-                                                            -
-
-                                                        </span>
-
-                                                    )}
-
-                                                </td>
-
-                                            );
-
-                                        }
-                                    )}
-
-                                </tr>
-
-                            )
-                        )}
-
-                    </tbody>
-
-                </table>
-
-
-                <div className="capture-footer">
-
-                    Class Database
+                    </div>
 
                 </div>
 
-            </div>
+            );
 
-        );
-
-    };
+        };
 
 
     // ==================================================
@@ -1478,9 +1864,6 @@ function App() {
 
             {/* ==========================================
                 캡처용 시간표
-
-                화면 밖에 존재하지만 실제 렌더링되므로
-                html2canvas가 캡처할 수 있음
                 ========================================== */}
 
             <div
@@ -1496,5 +1879,6 @@ function App() {
     );
 
 }
+
 
 export default App;
