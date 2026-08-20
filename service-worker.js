@@ -1,16 +1,70 @@
-// public/service-worker.js
+const CACHE_NAME = "class-notify-v1";
 
-// 설치 단계: 서비스 워커가 설치될 때 제어권을 즉시 가져옴
-self.addEventListener('install', (event) => {
+const STATIC_ASSETS = [
+  "/",
+  "/index.html",
+  "/manifest.json"
+];
+
+self.addEventListener("install", (event) => {
+  event.waitUntil(
+    caches.open(CACHE_NAME).then((cache) => {
+      return cache.addAll(STATIC_ASSETS);
+    })
+  );
+
   self.skipWaiting();
 });
 
-// 활성화 단계
-self.addEventListener('activate', (event) => {
-  return self.clients.claim();
+self.addEventListener("activate", (event) => {
+  event.waitUntil(
+    caches.keys().then((cacheNames) => {
+      return Promise.all(
+        cacheNames
+          .filter((name) => name !== CACHE_NAME)
+          .map((name) => caches.delete(name))
+      );
+    })
+  );
+
+  self.clients.claim();
 });
 
-// 네트워크 요청 가로채기 (현재는 아무것도 하지 않음)
-self.addEventListener('fetch', (event) => {
-  // 나중에 오프라인 캐싱 기능을 여기에 추가할 수 있습니다.
+self.addEventListener("fetch", (event) => {
+  const request = event.request;
+
+  // API 요청은 Service Worker에서 캐싱하지 않음
+  if (
+    request.url.includes("/api/") ||
+    request.method !== "GET"
+  ) {
+    return;
+  }
+
+  event.respondWith(
+    fetch(request)
+      .then((response) => {
+        if (
+          response &&
+          response.status === 200 &&
+          response.type === "basic"
+        ) {
+          const responseClone = response.clone();
+
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(request, responseClone);
+          });
+        }
+
+        return response;
+      })
+      .catch(() => {
+        return caches.match(request).then((cachedResponse) => {
+          return (
+            cachedResponse ||
+            caches.match("/index.html")
+          );
+        });
+      })
+  );
 });
